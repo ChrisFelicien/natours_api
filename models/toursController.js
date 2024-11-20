@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import slugify from "slugify";
 
 const tourSchema = new mongoose.Schema({
   name: {
@@ -44,7 +45,20 @@ const tourSchema = new mongoose.Schema({
     type: String
   },
   images: { type: [String] },
-  startDates: { type: [Date] }
+  startDates: { type: [Date] },
+  slug: {
+    type: String
+  }
+});
+
+tourSchema.pre("save", function (next) {
+  this.slug = slugify(this.name, {
+    replacement: "-",
+    lower: true,
+    trim: true
+  });
+
+  next();
 });
 
 const Tour = mongoose.model("Tour", tourSchema);

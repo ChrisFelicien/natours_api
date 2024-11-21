@@ -43,3 +43,48 @@ export const loginUser = catchAsyncError(async (req, res, next) => {
     user
   });
 });
+
+export const protectRoute = catchAsyncError(async (req, res, next) => {
+  let token;
+  const { authorization } = req.headers;
+
+  if (!authorization || !authorization.startsWith("Bearer")) {
+    return next(new createError(`Please login to proceed`, 400));
+  }
+
+  token = authorization.split(" ")?.[1];
+
+  if (!token) {
+    return next(new createError("Please provide token", 401));
+  }
+
+  const decoded = jwt.verify(token, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE_IN
+  });
+
+  const user = await User.findById(decoded.id);
+
+  if (!user) {
+    return next(
+      new createError("User not found, please try to login again", 401)
+    );
+  }
+
+  req.user = user;
+  next();
+});
+
+export const restrictedTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new createError(
+          "You do not have permission  to perform this action",
+          403
+        )
+      );
+    }
+
+    next();
+  };
+};

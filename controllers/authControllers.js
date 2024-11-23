@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import User from "../models/usersModels.js";
 import catchAsyncError from "./../utils/catchAsyncError.js";
@@ -102,7 +103,7 @@ export const forgotPassword = catchAsyncError(async (req, res, next) => {
   const resetToken = user.createResetPasswordToken();
   await user.save({ validateBeforeSave: false });
 
-  const resetUrl = `${req.url}://${req.get(
+  const resetUrl = `${req.protocol}://${req.get(
     "host"
   )}/api/v1/users/auth/reset-password/${resetToken}`;
 
@@ -135,12 +136,63 @@ export const forgotPassword = catchAsyncError(async (req, res, next) => {
 });
 
 export const resetPassword = catchAsyncError(async (req, res, next) => {
-  const { token } = req.params;
+  const { token: urlToken } = req.params;
 
-  console.log(token);
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(urlToken)
+    .digest("hex");
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordTokenExpireIn: { $gt: Date.now() }
+  });
+
+  console.log(user);
+
+  if (!user) {
+    return next(new createError("Token is invalid or expired", 500));
+  }
+
+  user.password = req.body.password;
+  user.confirmPassword = req.body.confirmPassword;
+  user.passwordResetToken = undefined;
+  user.passwordTokenExpireIn = undefined;
+
+  await user.save();
+
+  const token = generateToken(user._id);
 
   res.status(200).json({
     status: "success",
-    message: "Reset password"
+    token,
+    user
+  });
+});
+
+export const changePassword = catchAsyncError(async (req, res, next) => {
+  const user = await User.findById(req.user._id).select("+password");
+
+  const { password, newPassword, confirmNewPassword } = req.body;
+
+  if (!(await user.checkPassword(password, user.password))) {
+    return next(new createError("Please provide valid password", 401));
+  }
+
+  if (newPassword !== confirmNewPassword) {
+    return next(new createError(`The two password should match`, 401));
+  }
+
+  user.password = newPassword;
+  user.confirmPassword = confirmNewPassword;
+
+  user.save();
+
+  const token = generateToken(user._id);
+
+  res.status(200).json({
+    status: "success",
+    token,
+    user
   });
 });

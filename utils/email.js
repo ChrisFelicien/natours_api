@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { MailtrapTransport } from "mailtrap";
 
 const sendEmail = async (options) => {
   try {

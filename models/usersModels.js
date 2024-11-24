@@ -19,11 +19,13 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: ["user", "admin", "guide", "lead-guide"],
-      default: "user"
+      default: "user",
+      select: false
     },
     active: {
       type: Boolean,
-      default: true
+      default: true,
+      select: false
     },
     photo: { type: String },
     password: {
@@ -48,6 +50,12 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+userSchema.pre(/^find/, function (next) {
+  this.find({ active: true });
+
+  next();
+});
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {

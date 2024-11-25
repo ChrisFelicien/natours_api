@@ -11,17 +11,37 @@ const generateToken = (id) => {
   });
 };
 
+const createSendToken = (res, statusCode, user) => {
+  const token = generateToken(user._id);
+
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRE_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true
+  };
+
+  if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
+
+  res.cookie("jwt", token, cookieOptions);
+
+  user.password = undefined;
+
+  res.status(statusCode).json({
+    status: "success",
+    token,
+    date: {
+      user
+    }
+  });
+};
+
 export const signUpUser = catchAsyncError(async (req, res, next) => {
   const { name, email, password, confirmPassword } = req.body;
 
   const user = await User.create({ name, email, password, confirmPassword });
-  const token = generateToken(user._id);
 
-  res.status(201).json({
-    status: "success",
-    token,
-    user
-  });
+  createSendToken(res, 201, user);
 });
 
 export const loginUser = catchAsyncError(async (req, res, next) => {
@@ -37,13 +57,7 @@ export const loginUser = catchAsyncError(async (req, res, next) => {
     return next(new createError("Invalid email or password", 401));
   }
 
-  const token = generateToken(user._id);
-
-  res.status(200).json({
-    status: "success",
-    token,
-    user
-  });
+  createSendToken(res, 201, user);
 });
 
 export const protectRoute = catchAsyncError(async (req, res, next) => {
@@ -148,8 +162,6 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
     passwordTokenExpireIn: { $gt: Date.now() }
   });
 
-  console.log(user);
-
   if (!user) {
     return next(new createError("Token is invalid or expired", 500));
   }
@@ -161,13 +173,7 @@ export const resetPassword = catchAsyncError(async (req, res, next) => {
 
   await user.save();
 
-  const token = generateToken(user._id);
-
-  res.status(200).json({
-    status: "success",
-    token,
-    user
-  });
+  createSendToken(res, 201, user);
 });
 
 export const changePassword = catchAsyncError(async (req, res, next) => {
@@ -188,11 +194,5 @@ export const changePassword = catchAsyncError(async (req, res, next) => {
 
   user.save();
 
-  const token = generateToken(user._id);
-
-  res.status(200).json({
-    status: "success",
-    token,
-    user
-  });
+  createSendToken(res, 201, user);
 });

@@ -78,7 +78,7 @@ export const protectRoute = catchAsyncError(async (req, res, next) => {
     expiresIn: process.env.JWT_EXPIRE_IN
   });
 
-  const user = await User.findById(decoded.id);
+  const user = await User.findById(decoded.id).select("+role");
 
   if (!user) {
     return next(
@@ -92,6 +92,7 @@ export const protectRoute = catchAsyncError(async (req, res, next) => {
 
 export const restrictedTo = (...roles) => {
   return (req, res, next) => {
+    console.log(req.user);
     if (!roles.includes(req.user.role)) {
       return next(
         new createError(

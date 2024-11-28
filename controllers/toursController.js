@@ -23,7 +23,7 @@ export const isTourExist = catchAsyncError(async (req, res, next) => {
 });
 
 export const getAllTours = catchAsyncError(async (req, res, next) => {
-  const tours = await Tour.find();
+  const tours = await Tour.find().populate("reviews");
 
   res.status(201).json({
     status: "success",
@@ -58,7 +58,7 @@ export const updateTour = catchAsyncError(async (req, res, next) => {
 export const getSingleTour = catchAsyncError(async (req, res, next) => {
   const { id } = req.params;
 
-  const tour = await Tour.findById(id);
+  const tour = await Tour.findById(id).populate("reviews");
 
   res.status(200).json({
     status: "success",

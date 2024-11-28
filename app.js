@@ -4,11 +4,12 @@ import rateLimit from "express-rate-limit";
 import mongoSanitize from "express-mongo-sanitize";
 import hpp from "hpp";
 import xss from "xss-clean";
+import morgan from "morgan";
 import ErrorConstructor from "./utils/Errors.js";
 import globalError from "./controllers/globalErrorHandler.js";
 import toursRoutes from "./routes/toursRoute.js";
 import usersRoute from "./routes/usersRoutes.js";
-import morgan from "morgan";
+import reviewsRoute from "./routes/reviewRoute.js";
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use(
 app.use("/api", limiter);
 app.use("/api/v1/tours", toursRoutes);
 app.use("/api/v1/users", usersRoute);
+app.use("/api/v1/reviews", reviewsRoute);
 
 app.all("*", (req, res, next) => {
   next(

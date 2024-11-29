@@ -92,7 +92,6 @@ export const protectRoute = catchAsyncError(async (req, res, next) => {
 
 export const restrictedTo = (...roles) => {
   return (req, res, next) => {
-    console.log(req.user);
     if (!roles.includes(req.user.role)) {
       return next(
         new createError(

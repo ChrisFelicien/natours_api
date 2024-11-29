@@ -2,6 +2,7 @@ import validator from "validator";
 import Tour from "../models/toursController.js";
 import catchAsyncError from "./../utils/catchAsyncError.js";
 import CreateError from "./../utils/Errors.js";
+import factory from "./handlerFactory.js";
 
 export const isValidId = (req, res, next, id) => {
   if (!validator.isMongoId(id)) {
@@ -66,10 +67,12 @@ export const getSingleTour = catchAsyncError(async (req, res, next) => {
   });
 });
 
-export const deleteTour = catchAsyncError(async (req, res, next) => {
-  const { id } = req.params;
+export const deleteTour = factory.deleteOne(Tour);
 
-  const tour = await Tour.findByIdAndDelete(id);
+// export const deleteTour = catchAsyncError(async (req, res, next) => {
+//   const { id } = req.params;
 
-  res.status(204).json();
-});
+//   const tour = await Tour.findByIdAndDelete(id);
+
+//   res.status(204).json();
+// });

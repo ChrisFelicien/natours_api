@@ -1,6 +1,7 @@
 import catchAsyncError from "../utils/catchAsyncError.js";
 import createError from "./../utils/Errors.js";
 import User from "../models/usersModels.js";
+import factory from "./handlerFactory.js";
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -49,3 +50,5 @@ export const deleteMe = catchAsyncError(async (req, res, next) => {
     message: "User deleted"
   });
 });
+
+export const deleteUser = factory.deleteOne(User);

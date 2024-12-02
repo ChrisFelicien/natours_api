@@ -8,11 +8,10 @@ import { protectRoute, restrictedTo } from "../controllers/authControllers.js";
 
 const router = express.Router({ mergeParams: true });
 
-router
-  .route("/")
-  .get(getAllReview)
-  .post(protectRoute, restrictedTo("user"), createReview);
+router.use(protectRoute);
 
-router.route("/:id").delete(deleteReview);
+router.route("/").get(getAllReview).post(restrictedTo("user"), createReview);
+
+router.route("/:id").delete(restrictedTo("admin", "user"), deleteReview);
 
 export default router;

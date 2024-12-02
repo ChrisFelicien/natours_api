@@ -14,12 +14,17 @@ import reviewRouter from "./reviewRoute.js";
 const router = Router();
 
 router.use("/:tourId/reviews", reviewRouter);
-router.route("/").get(protectRoute, getAllTours).post(createTour);
+router.route("/").get(getAllTours).post(createTour);
 router.param("id", isValidId);
 
 router
   .route("/:id")
-  .patch(isTourExist, updateTour)
+  .patch(
+    isTourExist,
+    protectRoute,
+    restrictedTo("admin", "lead-guide"),
+    updateTour
+  )
   .get(isTourExist, getSingleTour)
   .delete(
     protectRoute,
@@ -28,10 +33,4 @@ router
     deleteTour
   );
 
-// router
-//   .route("/:tourId/reviews")
-//   .post(protectRoute, restrictedTo("user"), createReview);
-
 export default router;
-
-//

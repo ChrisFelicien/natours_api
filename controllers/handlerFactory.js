@@ -16,4 +16,43 @@ const deleteOne = (Model) => {
   });
 };
 
-export default { deleteOne };
+const updateOne = (Model) => {
+  return catchAsyncError(async (req, res, next) => {
+    const { id } = req.params;
+
+    const document = await Model.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidator: true
+    });
+
+    res.status(200).json({
+      message: "success",
+      document
+    });
+  });
+};
+
+const createOne = (Model) => {
+  return catchAsyncError(async (req, res, next) => {
+    const document = await Model.create(req.body);
+
+    res.status(201).json({
+      status: "success",
+      tour
+    });
+  });
+};
+
+const getOne = (Model) => {
+  return catchAsyncError(async (req, res, next) => {
+    const { id } = req.params;
+    const tour = await Tour.findById(id).populate("reviews");
+
+    res.status(200).json({
+      status: "success",
+      tour
+    });
+  });
+};
+
+export default { deleteOne, updateOne, createOne, getOne };

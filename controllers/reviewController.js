@@ -30,3 +30,4 @@ export const createReview = catchAsyncError(async (req, res, next) => {
 });
 
 export const deleteReview = factory.deleteOne(Review);
+export const updateREview = factory.updateOne(Review);

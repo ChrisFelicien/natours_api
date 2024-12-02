@@ -1,5 +1,5 @@
 import validator from "validator";
-import Tour from "../models/toursController.js";
+import Tour from "../models/toursModel.js";
 import catchAsyncError from "./../utils/catchAsyncError.js";
 import CreateError from "./../utils/Errors.js";
 import factory from "./handlerFactory.js";
@@ -33,46 +33,10 @@ export const getAllTours = catchAsyncError(async (req, res, next) => {
   });
 });
 
-export const createTour = catchAsyncError(async (req, res, next) => {
-  const tour = await Tour.create(req.body);
+export const createTour = factory.createOne(Tour);
 
-  res.status(201).json({
-    status: "success",
-    tour
-  });
-});
+export const updateTour = factory.updateOne(Tour);
 
-export const updateTour = catchAsyncError(async (req, res, next) => {
-  const { id } = req.params;
-
-  const tour = await Tour.findByIdAndUpdate(id, req.body, {
-    new: true,
-    runValidators: true
-  });
-
-  res.status(200).json({
-    status: "success",
-    tour
-  });
-});
-
-export const getSingleTour = catchAsyncError(async (req, res, next) => {
-  const { id } = req.params;
-
-  const tour = await Tour.findById(id).populate("reviews");
-
-  res.status(200).json({
-    status: "success",
-    tour
-  });
-});
+export const getSingleTour = factory.getOne(Tour);
 
 export const deleteTour = factory.deleteOne(Tour);
-
-// export const deleteTour = catchAsyncError(async (req, res, next) => {
-//   const { id } = req.params;
-
-//   const tour = await Tour.findByIdAndDelete(id);
-
-//   res.status(204).json();
-// });
